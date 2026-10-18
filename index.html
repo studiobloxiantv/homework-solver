@@ -1,0 +1,66 @@
+let visual = `   \({finalAns}\n\){divisor} ┌\({'-'.repeat(divStr.length + 2)}\n\){divStr}`;
+
+if (currentRem > 0) {
+    visual += `  (Remainder \${currentRem})`;
+}
+
+renderResult(visual, stepsHtml);
+
+function calcBodmas() {
+    let expr = document.getElementById('bodmas-expr').value;
+    let stepsHtml = ``;
+
+    try {
+        let safeExpr = expr.replace(/[^0-9+\-*/().\s]/g, '');
+
+        stepsHtml += `<div class="step-box">Follow the rules of **BODMAS**: **B**rackets first, then **O**rders (powers), then **D**ivision and **M**ultiplication, and finally **A**ddition and **S**ubtraction.</div>`;
+
+        if (safeExpr.includes('(')) {
+            stepsHtml += `<div class="step-box">1. Break open the **Brackets ()** and solve what is inside them first.</div>`;
+        }
+
+        let finalAns = Function('"use strict"; return (' + safeExpr + ')')();
+
+        stepsHtml += `<div class="step-box">2. Calculate any multiplication (*) or division (/) steps moving from left to right.</div>`;
+        stepsHtml += `<div class="step-box">3. Complete the remaining addition (+) or subtraction (-) steps.</div>`;
+        stepsHtml += `<div class="step-box"><strong>Final Answer: ${finalAns}</strong></div>`;
+
+        renderResult(expr + " = " + finalAns, stepsHtml);
+    } catch (e) {
+        renderResult("Error", `<div class="step-box">Make sure your expression only uses standard characters like numbers, +, -, *, /, and brackets ().</div>`);
+    }
+}
+
+function renderResult(visual, steps) {
+    document.getElementById('math-visual').innerText = visual;
+    document.getElementById('steps-container').innerHTML = steps;
+    document.getElementById('explanation-output').style.display = 'block';
+}
+
+// Dynamic Manifest Injection with new calculator icon setup
+const manifest = {
+    "short_name": "Steps",
+    "name": "Steps - See the Working Out",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fafafa",
+    "theme-color": "#FF5722",
+    "icons": [{
+        "src": "https://flaticon.com",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any maskable"
+    }]
+};
+
+const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        self.addEventListener('install', (e) => self.skipWaiting()); 
+        self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log(err));
+}
