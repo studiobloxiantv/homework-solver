@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Steps - Visual Calculator</title>
     <meta name="theme-color" content="#1e1e24">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Modern PWA Capability Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" id="pwa-manifest">
 
@@ -60,6 +62,8 @@
             padding: 10px;
             overflow-y: auto;
             margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .input-history {
@@ -152,13 +156,11 @@
 <body>
 
 <div class="calc-container">
-    <!-- Display Screen -->
     <div class="display-screen">
         <div id="working-area" class="working-display"></div>
         <div id="input-buffer" class="input-history">0</div>
     </div>
 
-    <!-- Numpad Grid -->
     <div class="numpad">
         <button class="btn-function" onclick="clearCalc()">AC</button>
         <button class="btn-function" onclick="appendOp('/')">÷</button>
@@ -234,24 +236,39 @@
     function calculate() {
         if (!currentInput) return;
 
-        // Cleaned up validation engine to split simple operations cleanly
-        const match = currentInput.match(/^(\d+)([\+\-\*\/])(\d+)$/);
-
-        if (match) {
-            const num1 = parseInt(match[1]);
-            const op = match[2];
-            const num2 = parseInt(match[3]);
-
-            if (op === '/' && num2 !== 0) {
-                generateBusStopVisual(num1, num2);
-            } else if (op === '+' || op === '-') {
-                generateColumnVisual(num1, num2, op);
-            } else {
-                runStandardEval();
+        // Find the operator position using string checking instead of volatile regex bounds
+        let activeOp = "";
+        for (let char of ["+", "-", "*", "/"]) {
+            // Skips leading index matching negative sign bounds
+            if (currentInput.slice(1).includes(char)) {
+                activeOp = char;
+                break;
             }
-        } else {
-            runStandardEval();
         }
+
+        if (activeOp) {
+            let splitIndex = currentInput.indexOf(activeOp, currentInput.startsWith("-") ? 1 : 0);
+            let part1 = currentInput.substring(0, splitIndex);
+            let part2 = currentInput.substring(splitIndex + 1);
+            
+            let num1 = parseInt(part1, 10);
+            let num2 = parseInt(part2, 10);
+
+            if (!isNaN(num1) && !isNaN(num2)) {
+                if (activeOp === '/' && num2 !== 0) {
+                    generateBusStopVisual(num1, num2);
+                    lastCalculated = true;
+                    return;
+                } else if (activeOp === '+' || activeOp === '-') {
+                    generateColumnVisual(num1, num2, activeOp);
+                    lastCalculated = true;
+                    return;
+                }
+            }
+        }
+
+        // Standard equations fallback logic block
+        runStandardEval();
         lastCalculated = true;
     }
 
@@ -291,41 +308,41 @@
         let answerStr = "";
 
         for (let i = 0; i < divStr.length; i++) {
-            let digit = parseInt(divStr[i]);
+            let digit = parseInt(divStr[i], 10);
             let currentVal = currentRem * 10 + digit;
             let fits = Math.floor(currentVal / divisor);
-            let nextRem = currentVal % divisor;
-            answerStr += fits;
-            currentRem = nextRem;
-        }
-
-        const finalAns = parseInt(answerStr) || 0;
-        let padSpaces = divisor.toString().length + 2;
-        
-        let line1 = " ".repeat(padSpaces) + finalAns;
-        let line2 = ` ${divisor} ┌${'-'.repeat(divStr.length + 1)}`;
-        let line3 = " ".repeat(padSpaces) + divStr;
-        
-        let visual = `${line1}\n${line2}\n${line3}`;
-        if (currentRem > 0) {
-            visual += `\n\nRemainder: ${currentRem}`;
-        }
-
-        workingEl.innerText = visual;
-        workingEl.style.display = "block";
-        updateDisplay(finalAns.toString());
+        let nextRem = currentVal % divisor;
+        answerStr += fits;
+        currentRem = nextRem;
     }
 
-// Dynamic manifest registration
+    const finalAns = parseInt(answerStr, 10) || 0;
+    let padSpaces = divisor.toString().length + 2;
+    
+    let line1 = " ".repeat(padSpaces) + finalAns;
+    let line2 = ` ${divisor} ┌${'-'.repeat(divStr.length + 1)}`;
+    let line3 = " ".repeat(padSpaces) + divStr;
+    
+    let visual = `${line1}\n${line2}\n${line3}`;
+    if (currentRem > 0) {
+        visual += `\n\nRemainder: ${currentRem}`;
+    }
+
+    workingEl.innerText = visual;
+    workingEl.style.display = "block";
+    updateDisplay(finalAns.toString());
+}
+
+// Dynamic Manifest Setup Configuration
 const manifest = {
     "short_name": "Steps",
     "name": "Steps - Visual Math Calculator",
     "start_url": ".",
-    "display": "fullscreen",
+    "display": "standalone",
     "background_color": "#1c1c1e",
     "theme-color": "#1e1e24",
     "icons": [{
-        "src": "https://cdn.jim-nielsen.com/ios/512/calculator-2020-02-06.png?rf=1024",
+        "src": "https://flaticon.com",
         "type": "image/png",
         "sizes": "512x512",
         "purpose": "any maskable"
@@ -343,4 +360,3 @@ if ('serviceWorker' in navigator) {
     const swBlob = new Blob([swCode], { type: 'application/javascript' });
     navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log(err));
 }
-
