@@ -2,242 +2,269 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steps - See the Working Out</title>
-    <meta name="theme-color" content="#FF5722">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Steps - Visual Calculator</title>
+    <meta name="theme-color" content="#1e1e24">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" id="pwa-manifest">
 
     <style>
         :root {
-            --primary: #FF5722;
-            --bg: #fafafa;
-            --card-bg: #ffffff;
-            --text: #1a1a1a;
-            --accent: #2196F3;
+            --bg: #000000;
+            --calc-bg: #1c1c1e;
+            --display-text: #ffffff;
+            --btn-num: #3a3a3c;
+            --btn-op: #ff9f0a;
+            --btn-fn: #a5a5a5;
+            --btn-text-dark: #000000;
+            --btn-text-light: #ffffff;
+            --working-bg: #2c2c2e;
         }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 0;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--display-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .calc-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 440px;
+            max-height: 900px;
+            background-color: var(--calc-bg);
             display: flex;
             flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            justify-content: flex-end;
+            padding: 20px;
             box-sizing: border-box;
-            margin-top: 10px;
+            border-radius: 30px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
         }
-        .logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        h1 {
-            font-size: 32px;
-            margin: 0;
-            color: var(--primary);
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #666;
-            margin: 4px 0 0 0;
-            font-weight: 500;
-        }
-        .tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 20px;
-            background: #f0f0f0;
-            padding: 4px;
-            border-radius: 10px;
-        }
-        .tab-btn {
+
+        /* Calculator Display Screen */
+        .display-screen {
             flex: 1;
-            padding: 12px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-weight: 700;
-            border-radius: 7px;
-            font-size: 14px;
-            color: #555;
-            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 10px;
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow-y: auto;
+            margin-bottom: 15px;
         }
-        .tab-btn.active {
-            background: var(--card-bg);
-            color: var(--primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+        .input-history {
+            font-size: 28px;
+            color: #888;
+            min-height: 35px;
+            margin-bottom: 5px;
         }
-        .input-group {
-            margin-bottom: 16px;
-        }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #444;
-        }
-        input, select {
+
+        /* Working Out Visual Area */
+        .working-display {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
+            background: var(--working-bg);
+            border-radius: 16px;
+            padding: 15px;
             box-sizing: border-box;
-            background: #fcfcfc;
-            transition: border-color 0.2s ease;
-        }
-        input:focus, select:focus {
-            border-color: var(--primary);
-            outline: none;
-            background: #fff;
-        }
-        button.calc-btn {
-            width: 100%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 8px;
-            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.2);
-            transition: transform 0.1s ease;
-        }
-        button.calc-btn:active {
-            transform: scale(0.98);
-        }
-        .output {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px dashed #eee;
-        }
-        .output h3 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .step-box {
-            background: #f4f9ff;
-            border-left: 4px solid var(--accent);
-            padding: 14px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .math-display {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 24px;
+            font-size: 20px;
             line-height: 1.4;
-            margin: 16px 0;
             white-space: pre;
-            background: #1e1e1e;
-            color: #ffffff;
-            padding: 18px;
-            border-radius: 12px;
+            color: #2ed573;
             overflow-x: auto;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            display: none;
+            text-align: left;
+            border: 1px solid #444;
         }
-        .panel { display: none; }
-        .panel.active { display: block; }
+
+        /* Numpad Button Grid Layout */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            border: none;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            font-size: 32px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: brightness 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            filter: brightness(1.3);
+        }
+
+        .btn-number {
+            background-color: var(--btn-num);
+            color: var(--btn-text-light);
+        }
+
+        .btn-operator {
+            background-color: var(--btn-op);
+            color: var(--btn-text-light);
+            font-size: 36px;
+        }
+
+        .btn-function {
+            background-color: var(--btn-fn);
+            color: var(--btn-text-dark);
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+            border-radius: 40px;
+            aspect-ratio: auto;
+            height: 100%;
+            justify-content: flex-start;
+            padding-left: 32px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="logo-container">
-        <h1>Steps</h1>
-        <p class="subtitle">See the Working Out</p>
-    </div>
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('column')">Column</button>
-        <button class="tab-btn" onclick="switchTab('bus')">Bus Stop</button>
-        <button class="tab-btn" onclick="switchTab('bodmas')">BODMAS</button>
+<div class="calc-container">
+    <!-- Screen Area -->
+    <div class="display-screen">
+        <div id="working-area" class="working-display"></div>
+        <div id="input-buffer" class="input-history">0</div>
     </div>
 
-    <!-- COLUMN METHOD PANEL -->
-    <div id="column-panel" class="panel active">
-        <div class="input-group">
-            <label for="col-num1">First Number:</label>
-            <input type="number" id="col-num1" value="348">
-        </div>
-        <div class="input-group">
-            <label for="col-op">Operation:</label>
-            <select id="col-op">
-                <option value="+">Addition (+)</option>
-                <option value="-">Subtraction (-)</option>
-            </select>
-        </div>
-        <div class="input-group">
-            <label for="col-num2">Second Number:</label>
-            <input type="number" id="col-num2" value="175">
-        </div>
-        <button class="calc-btn" onclick="calcColumn()">Show Steps</button>
-    </div>
+    <!-- Numpad Grid -->
+    <div class="numpad">
+        <button class="btn-function" onclick="clearCalc()">AC</button>
+        <button class="btn-function" onclick="appendOp('/')">÷</button>
+        <button class="btn-function" onclick="appendOp('*')">×</button>
+        <button class="btn-operator" onclick="appendOp('-')">−</button>
 
-    <!-- BUS STOP PANEL -->
-    <div id="bus-panel" class="panel">
-        <div class="input-group">
-            <label for="bus-dividend">Number to divide (inside house):</label>
-            <input type="number" id="bus-dividend" value="432">
-        </div>
-        <div class="input-group">
-            <label for="bus-divisor">Divide by (outside house):</label>
-            <input type="number" id="bus-divisor" value="3">
-        </div>
-        <button class="calc-btn" onclick="calcBusStop()">Show Steps</button>
-    </div>
+        <button class="btn-number" onclick="appendNum(7)">7</button>
+        <button class="btn-number" onclick="appendNum(8)">8</button>
+        <button class="btn-number" onclick="appendNum(9)">9</button>
+        <button class="btn-operator" onclick="appendOp('+')">+</button>
 
-    <!-- BODMAS PANEL -->
-    <div id="bodmas-panel" class="panel">
-        <div class="input-group">
-            <label for="bodmas-expr">Sum (e.g., 12 + (8 - 3) * 4):</label>
-            <input type="text" id="bodmas-expr" value="12 + (8 - 3) * 4">
-        </div>
-        <button class="calc-btn" onclick="calcBodmas()">Show Steps</button>
-    </div>
+        <button class="btn-number" onclick="appendNum(4)">4</button>
+        <button class="btn-number" onclick="appendNum(5)">5</button>
+        <button class="btn-number" onclick="appendNum(6)">6</button>
+        <button class="btn-operator" onclick="calculate()">=</button>
 
-    <!-- EXPLANATION OUTPUT -->
-    <div id="explanation-output" class="output" style="display:none;">
-        <h3>Working Out:</h3>
-        <div id="math-visual" class="math-display"></div>
-        <div id="steps-container"></div>
+        <button class="btn-number" onclick="appendNum(1)">1</button>
+        <button class="btn-number" onclick="appendNum(2)">2</button>
+        <button class="btn-number" onclick="appendNum(3)">3</button>
+        <button class="btn-number btn-zero" onclick="appendNum(0)">0</button>
     </div>
 </div>
 
 <script>
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('explanation-output').style.display = 'none';
-        
-        event.target.classList.add('active');
-        document.getElementById(`${tab}-panel`).classList.add('active');
+    let currentInput = "";
+    let lastCalculated = false;
+
+    const bufferEl = document.getElementById('input-buffer');
+    const workingEl = document.getElementById('working-area');
+
+    function updateDisplay(val) {
+        bufferEl.innerText = val || "0";
     }
 
-    function calcColumn() {
-        const n1 = parseInt(document.getElementById('col-num1').value);
-        const n2 = parseInt(document.getElementById('col-num2').value);
-        const op = document.getElementById('col-op').value;
-        
-        if(isNaN(n1) || isNaN(n2)) return;
+    function appendNum(num) {
+        if (lastCalculated) {
+            currentInput = "";
+            lastCalculated = false;
+            workingEl.style.display = "none";
+        }
+        if (currentInput === "0") currentInput = "";
+        currentInput += num;
+        updateDisplay(currentInput);
+    }
 
+    function appendOp(op) {
+        if (lastCalculated) {
+            lastCalculated = false;
+            workingEl.style.display = "none";
+        }
+        if (currentInput === "" && op === "-") {
+            currentInput = "-";
+            updateDisplay(currentInput);
+            return;
+        }
+        // Don't allow multiple consecutive operators
+        if (["+", "-", "*", "/"].includes(currentInput.slice(-1))) {
+            currentInput = currentInput.slice(0, -1) + op;
+        } else if (currentInput !== "") {
+            currentInput += op;
+        }
+        updateDisplay(currentInput);
+    }
+
+    function clearCalc() {
+        currentInput = "";
+        lastCalculated = false;
+        updateDisplay("0");
+        workingEl.innerText = "";
+        workingEl.style.display = "none";
+    }
+
+    function calculate() {
+        if (!currentInput) return;
+
+        // Parse out basic structured sums to verify if they map to Column or Bus Stop methods
+        const match = currentInput.match(/^(\d+)([\+\-\*\/])(\d+)$/);
+
+        if (match) {
+            const num1 = parseInt(match[1]);
+            const op = match[2];
+            const num2 = parseInt(match[3]);
+
+            if (op === '/' && num2 !== 0) {
+                generateBusStopVisual(num1, num2);
+            } else if (op === '+' || op === '-') {
+                generateColumnVisual(num1, num2, op);
+            } else {
+                // Fallback direct math processing
+                runStandardEval();
+            }
+        } else {
+            runStandardEval();
+        }
+        lastCalculated = true;
+    }
+
+    function runStandardEval() {
+        try {
+            let sanitized = currentInput.replace(/[^0-9+\-*/().]/g, '');
+            let result = Function('"use strict"; return (' + sanitized + ')')();
+            updateDisplay(result);
+            workingEl.innerText = "Equation Answer:\n" + result;
+            workingEl.style.display = "block";
+        } catch(e) {
+            updateDisplay("Error");
+        }
+    }
+
+    function generateColumnVisual(n1, n2, op) {
         const s1 = n1.toString();
         const s2 = n2.toString();
         const maxLen = Math.max(s1.length, s2.length);
@@ -246,99 +273,58 @@
         const pad2 = s2.padStart(maxLen, ' ');
         
         let ans = op === '+' ? n1 + n2 : n1 - n2;
-        let ansStr = ans.toString().padStart(maxLen + 2, ' ');
+        let ansStr = ans.toString().padStart(maxLen, ' ');
         
-        let visual = `  ${pad1}\n${op} ${pad2}\n${'-'.repeat(maxLen + 2)}\n${ansStr}`;
+        let visual = `  ${pad1}\n${op} ${pad2}\n${'-'.repeat(maxLen + 2)}\n  ${ansStr}`;
         
-        let stepsHtml = ``;
-        if (op === '+') {
-            stepsHtml += `<div class="step-box">Line up the place values (Hundreds, Tens, Units) neatly in vertical columns.</div>`;
-            stepsHtml += `<div class="step-box">Add the numbers column by column, starting from the **right side** (units column).</div>`;
-            if (n1 % 10 + n2 % 10 >= 10) {
-                stepsHtml += `<div class="step-box">If a column adds up to 10 or more, write the units digit down and **carry over** the tens digit to the next column on the left.</div>`;
-            }
-        } else {
-            stepsHtml += `<div class="step-box">Line up the place values. Top number minus bottom number.</div>`;
-            stepsHtml += `<div class="step-box">Work from right to left. If the top digit is smaller than the bottom digit, **borrow 1** from the column directly to the left.</div>`;
-        }
-
-        renderResult(visual, stepsHtml);
+        workingEl.innerText = visual;
+        workingEl.style.display = "block";
+        updateDisplay(ans);
     }
 
-    function calcBusStop() {
-        const dividend = parseInt(document.getElementById('bus-dividend').value);
-        const divisor = parseInt(document.getElementById('bus-divisor').value);
-        
-        if (isNaN(dividend) || !divisor) return;
-
+    function generateBusStopVisual(dividend, divisor) {
         const divStr = dividend.toString();
         let currentRem = 0;
         let answerStr = "";
-        let stepsHtml = ``;
 
         for (let i = 0; i < divStr.length; i++) {
             let digit = parseInt(divStr[i]);
             let currentVal = currentRem * 10 + digit;
             let fits = Math.floor(currentVal / divisor);
             let nextRem = currentVal % divisor;
-            
-            stepsHtml += `<div class="step-box">Look at **${currentVal}**. How many times does ${divisor} fit into it? It goes in **${fits}** times with a remainder of **${nextRem}**.</div>`;
-            
             answerStr += fits;
             currentRem = nextRem;
         }
 
-        const finalAns = parseInt(answerStr);
-
-let visual = `   \({finalAns}\n\){divisor} ┌\({'-'.repeat(divStr.length + 2)}\n\){divStr}`;
-
-if (currentRem > 0) {
-    visual += `  (Remainder \${currentRem})`;
-}
-
-renderResult(visual, stepsHtml);
-
-function calcBodmas() {
-    let expr = document.getElementById('bodmas-expr').value;
-    let stepsHtml = ``;
-
-    try {
-        let safeExpr = expr.replace(/[^0-9+\-*/().\s]/g, '');
-
-        stepsHtml += `<div class="step-box">Follow the rules of **BODMAS**: **B**rackets first, then **O**rders (powers), then **D**ivision and **M**ultiplication, and finally **A**ddition and **S**ubtraction.</div>`;
-
-        if (safeExpr.includes('(')) {
-            stepsHtml += `<div class="step-box">1. Break open the **Brackets ()** and solve what is inside them first.</div>`;
+        const finalAns = parseInt(answerStr) || 0;
+        let padSpaces = divisor.toString().length + 2;
+        
+        let line1 = " ".repeat(padSpaces) + finalAns;
+        let line2 = ` ${divisor} ┌${'-'.repeat(divStr.length + 1)}`;
+        let line3 = " ".repeat(padSpaces) + divStr;
+        
+        let visual = `${line1}\n${line2}\n${line3}`;
+        if (currentRem > 0) {
+            visual += `\n\nRemainder: ${currentRem}`;
         }
 
-        let finalAns = Function('"use strict"; return (' + safeExpr + ')')();
-
-        stepsHtml += `<div class="step-box">2. Calculate any multiplication (*) or division (/) steps moving from left to right.</div>`;
-        stepsHtml += `<div class="step-box">3. Complete the remaining addition (+) or subtraction (-) steps.</div>`;
-        stepsHtml += `<div class="step-box"><strong>Final Answer: ${finalAns}</strong></div>`;
-
-        renderResult(expr + " = " + finalAns, stepsHtml);
-    } catch (e) {
-        renderResult("Error", `<div class="step-box">Make sure your expression only uses standard characters like numbers, +, -, *, /, and brackets ().</div>`);
+        workingEl.innerText = visual;
+        workingEl.style.display = "block";
+        updateDisplay(finalAns);
     }
-}
 
-function renderResult(visual, steps) {
-    document.getElementById('math-visual').innerText = visual;
-    document.getElementById('steps-container').innerHTML = steps;
-    document.getElementById('explanation-output').style.display = 'block';
-}
-
-// Dynamic Manifest Injection with new calculator icon setup
+    // Secure PWA Manifest setup with high-res standard calculator icon mapping
+    const manifest = {
+// Secure PWA Manifest setup with high-res calculator icon mapping
 const manifest = {
     "short_name": "Steps",
-    "name": "Steps - See the Working Out",
+    "name": "Steps - Visual Math Calculator",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#fafafa",
-    "theme-color": "#FF5722",
+    "background_color": "#1c1c1e",
+    "theme-color": "#1e1e24",
     "icons": [{
-        "src": "https://flaticon.com",
+        "src": "https://cdn.jim-nielsen.com/ios/512/calculator-2020-02-06.png?rf=1024",
         "type": "image/png",
         "sizes": "512x512",
         "purpose": "any maskable"
@@ -350,7 +336,7 @@ document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL
 
 if ('serviceWorker' in navigator) {
     const swCode = `
-        self.addEventListener('install', (e) => self.skipWaiting()); 
+        self.addEventListener('install', (e) => self.skipWaiting());
         self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
     `;
     const swBlob = new Blob([swCode], { type: 'application/javascript' });
