@@ -51,7 +51,6 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.6);
         }
 
-        /* Calculator Display Screen */
         .display-screen {
             flex: 1;
             display: flex;
@@ -59,20 +58,22 @@
             justify-content: flex-end;
             align-items: flex-end;
             padding: 10px;
-            word-wrap: break-word;
-            word-break: break-all;
             overflow-y: auto;
             margin-bottom: 15px;
         }
 
         .input-history {
-            font-size: 28px;
-            color: #888;
-            min-height: 35px;
+            font-size: 42px;
+            color: #fff;
+            min-height: 55px;
             margin-bottom: 5px;
+            font-weight: 300;
+            text-align: right;
+            width: 100%;
+            word-wrap: break-word;
+            word-break: break-all;
         }
 
-        /* Working Out Visual Area */
         .working-display {
             width: 100%;
             background: var(--working-bg);
@@ -85,18 +86,19 @@
             white-space: pre;
             color: #2ed573;
             overflow-x: auto;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: none;
             text-align: left;
             border: 1px solid #444;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
         }
 
-        /* Numpad Button Grid Layout */
         .numpad {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 10px;
+            width: 100%;
         }
 
         button {
@@ -109,11 +111,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: brightness 0.2s ease;
+            transition: background-color 0.1s ease, transform 0.05s ease;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         button:active {
+            transform: scale(0.92);
             filter: brightness(1.3);
         }
 
@@ -148,7 +152,7 @@
 <body>
 
 <div class="calc-container">
-    <!-- Screen Area -->
+    <!-- Display Screen -->
     <div class="display-screen">
         <div id="working-area" class="working-display"></div>
         <div id="input-buffer" class="input-history">0</div>
@@ -186,7 +190,8 @@
     const workingEl = document.getElementById('working-area');
 
     function updateDisplay(val) {
-        bufferEl.innerText = val || "0";
+        let displayVal = val.replace(/\*/g, '×').replace(/\//g, '÷');
+        bufferEl.innerText = displayVal || "0";
     }
 
     function appendNum(num) {
@@ -210,7 +215,6 @@
             updateDisplay(currentInput);
             return;
         }
-        // Don't allow multiple consecutive operators
         if (["+", "-", "*", "/"].includes(currentInput.slice(-1))) {
             currentInput = currentInput.slice(0, -1) + op;
         } else if (currentInput !== "") {
@@ -230,7 +234,7 @@
     function calculate() {
         if (!currentInput) return;
 
-        // Parse out basic structured sums to verify if they map to Column or Bus Stop methods
+        // Cleaned up validation engine to split simple operations cleanly
         const match = currentInput.match(/^(\d+)([\+\-\*\/])(\d+)$/);
 
         if (match) {
@@ -243,7 +247,6 @@
             } else if (op === '+' || op === '-') {
                 generateColumnVisual(num1, num2, op);
             } else {
-                // Fallback direct math processing
                 runStandardEval();
             }
         } else {
@@ -256,8 +259,8 @@
         try {
             let sanitized = currentInput.replace(/[^0-9+\-*/().]/g, '');
             let result = Function('"use strict"; return (' + sanitized + ')')();
-            updateDisplay(result);
-            workingEl.innerText = "Equation Answer:\n" + result;
+            updateDisplay(result.toString());
+            workingEl.innerText = "Answer:\n" + result;
             workingEl.style.display = "block";
         } catch(e) {
             updateDisplay("Error");
@@ -279,7 +282,7 @@
         
         workingEl.innerText = visual;
         workingEl.style.display = "block";
-        updateDisplay(ans);
+        updateDisplay(ans.toString());
     }
 
     function generateBusStopVisual(dividend, divisor) {
@@ -310,17 +313,15 @@
 
         workingEl.innerText = visual;
         workingEl.style.display = "block";
-        updateDisplay(finalAns);
+        updateDisplay(finalAns.toString());
     }
 
-    // Secure PWA Manifest setup with high-res standard calculator icon mapping
-    const manifest = {
-// Secure PWA Manifest setup with high-res calculator icon mapping
+// Dynamic manifest registration
 const manifest = {
     "short_name": "Steps",
     "name": "Steps - Visual Math Calculator",
     "start_url": ".",
-    "display": "standalone",
+    "display": "fullscreen",
     "background_color": "#1c1c1e",
     "theme-color": "#1e1e24",
     "icons": [{
@@ -336,9 +337,10 @@ document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL
 
 if ('serviceWorker' in navigator) {
     const swCode = `
-        self.addEventListener('install', (e) => self.skipWaiting());
+        self.addEventListener('install', (e) => self.skipWaiting()); 
         self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
     `;
     const swBlob = new Blob([swCode], { type: 'application/javascript' });
     navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log(err));
 }
+
